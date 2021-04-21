@@ -1,8 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const errors = require('../../lib/custom_errors')
+const customErrors = require('../../lib/custom_errors')
 const passport = require('passport')
 const requireToken = passport.authenticate('bearer', { session: false })
+const handle404 = customErrors.handle404
+const requireOwnership = customErrors.requireOwnership
+const removeBlanks = require('../../lib/remove_blank_fields')
 //require models
 const Painting = require('../models/painting')
 
@@ -27,10 +30,31 @@ router.get('/paintings', requireToken, (req, res, next) => {
   //find paintings owned by that user
   Painting.find({ owner: ownerId})
   //if there is no paintings for that owner, send error
-  .then(errors)
+  .then(handle404)
   //if there are respond with 201 and paintings object
   .then(paintings => res.status(201).json({ paintings }))
   //continue down the middleware chain
   .catch(next)
 })
+
+//PATCH -update- paintings
+router.patch('/paintings/:id', requireToken, (req, res,next) => {
+  //access painting ID so correct painting can be found
+  const paintingId = req.params.id
+  //access painting data to be used for update
+  const paintingData = req.body.painting
+  //access user ID to compare to owner ID
+  const userId = req.user.id
+  delete paintingData.owner
+  //find painting by ID
+  Painting.findById(paintingId)
+    .then(handle404)
+    .then(painting => {
+      requireOwnership(req, painting)
+      return painting.updateOne(paintingData)
+    })
+    .then(() => res.sendStatus(204))
+    .catch(next)
+  })
+
 module.exports = router
