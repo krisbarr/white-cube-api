@@ -56,5 +56,17 @@ router.patch('/paintings/:id', requireToken, (req, res,next) => {
     .then(() => res.sendStatus(204))
     .catch(next)
   })
+// DELETE -destroy- paintings
+router.delete('/paintings/:id', requireToken, (req, res, next) => {
+  const paintingId = req.params.id
+  Painting.findById(paintingId)
+  .then(handle404)
+  .then(painting => {
+    requireOwnership(req, painting)
+    painting.deleteOne()
+  })
+  .then(() => res.sendStatus(204))
+  .catch(next)
+})
 
 module.exports = router
