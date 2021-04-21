@@ -11,8 +11,8 @@ curl "${API}${URL_PATH}" \
       "title": "'"${TITLE}"'",
       "artist": "'"${ARTIST}"'",
       "location": "'"${LOCATION}"'",
-      "movement": "'"${MOVEMENT}"'",
-      "owner": "'"${OWNER}"'"
+      "movement": "'"${MOVEMENT}"'"
+    }
   }'
 
 echo
