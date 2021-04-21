@@ -20,4 +20,17 @@ router.post('/paintings', requireToken, (req, res, next) => {
     .catch(next)
 })
 
+//GET -index- /paintings
+router.get('/paintings', requireToken, (req, res, next) => {
+  // access owner ID with req.user
+  const ownerId = req.user.id
+  //find paintings owned by that user
+  Painting.find({ owner: ownerId})
+  //if there is no paintings for that owner, send error
+  .then(errors)
+  //if there are respond with 201 and paintings object
+  .then(paintings => res.status(201).json({ paintings }))
+  //continue down the middleware chain
+  .catch(next)
+})
 module.exports = router
